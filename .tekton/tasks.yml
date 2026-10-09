@@ -29,7 +29,7 @@ spec:
         #!/bin/sh
         set -eu
         pip install --no-cache-dir -r requirements-dev.txt
-        nosetests -v tests
+        nose2 -v
 ---
 apiVersion: tekton.dev/v1
 kind: Task
