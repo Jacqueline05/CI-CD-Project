@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: cleanup
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: cleanup
+      image: alpine:3.20
+      script: |
+        #!/bin/sh
+        set -eu
+        find "$(workspaces.source.path)" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        echo "Workspace cleanup completed."
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: nose-test
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: run-nose-tests
+      image: python:3.11-slim
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -eu
+        pip install --no-cache-dir -r requirements-dev.txt
+        nosetests -v tests
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: lint
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: run-flake8
+      image: python:3.11-slim
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -eu
+        pip install --no-cache-dir -r requirements-dev.txt
+        flake8 app.py tests

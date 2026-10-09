@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ci-cd-pipeline
+spec:
+  workspaces:
+    - name: source
+  tasks:
+    - name: lint
+      taskRef:
+        name: lint
+      workspaces:
+        - name: source
+          workspace: source
+    - name: nose-test
+      runAfter:
+        - lint
+      taskRef:
+        name: nose-test
+      workspaces:
+        - name: source
+          workspace: source
+  finally:
+    - name: cleanup
+      taskRef:
+        name: cleanup
+      workspaces:
+        - name: source
+          workspace: source
